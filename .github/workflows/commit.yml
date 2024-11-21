@@ -1,34 +1,30 @@
-name: Enforce Commit Message Format
+name: Automate Commit
 
 on:
   push:
     branches:
-      - main  # Change this to your target branch if needed
+      - apple
 
 jobs:
-  check-commit-message:
+  commit-changes:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Validate commit message format
+      # Step 3: Make changes to the repository
+      - name: Make changes
         run: |
-          # Get the commit message of the last commit
-          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+          echo "This file was updated automatically on $(date)" >> automated-file.txt
 
-          # Define the required prefix message
-          REQUIRED_PREFIX="this is my commit"
+      # Step 4: Commit the changes
+      - name: Commit changes
+        run: |
+          git add .
+          git commit -m "Automated update on $(date)" || echo "No changes to commit"
 
-          # Check if the commit message starts with the required prefix
-          if [[ ! "$COMMIT_MESSAGE" =~ ^$REQUIRED_PREFIX ]]; then
-            echo "Commit message must start with: '$REQUIRED_PREFIX'"
-            exit 1
-          fi
-
-          # Ensure that the user includes their own message on the same line
-          if [[ "$COMMIT_MESSAGE" == "$REQUIRED_PREFIX" ]]; then
-            echo "Commit message must include a message after '$REQUIRED_PREFIX'"
-            exit 1
-          fi
+      # Step 5: Push the changes back to the repository
+      - name: Push changes
+        run: git push
