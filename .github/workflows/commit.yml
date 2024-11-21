@@ -1,19 +1,34 @@
-name: Enforce Commit Message
+name: Enforce Commit Message Format
 
 on:
   push:
     branches:
-      - tree
+      - main  # Change this to your target branch if needed
 
 jobs:
-  validate-commits:
+  check-commit-message:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Validate commit messages
+
+      - name: Validate commit message format
         run: |
-          if ! git log -1 --pretty=%B | grep -q "this is my commit"; then
-            echo "Commit message must include 'this is my commit'"
+          # Get the commit message of the last commit
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+
+          # Define the required prefix message
+          REQUIRED_PREFIX="this is my commit"
+
+          # Check if the commit message starts with the required prefix
+          if [[ ! "$COMMIT_MESSAGE" =~ ^$REQUIRED_PREFIX ]]; then
+            echo "Commit message must start with: '$REQUIRED_PREFIX'"
+            exit 1
+          fi
+
+          # Ensure that the user includes their own message on the same line
+          if [[ "$COMMIT_MESSAGE" == "$REQUIRED_PREFIX" ]]; then
+            echo "Commit message must include a message after '$REQUIRED_PREFIX'"
             exit 1
           fi
