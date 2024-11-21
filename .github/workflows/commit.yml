@@ -27,4 +27,4 @@ jobs:
 
       # Step 5: Push the changes back to the repository
       - name: Push changes
-        run: git push
+        run: git push https://github.com/nabeelspeehive/sample.git
