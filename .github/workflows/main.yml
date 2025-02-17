@@ -1,0 +1,37 @@
+name: QA Deployment
+
+on:
+  push:
+    branches:
+      - apple
+  workflow_dispatch:
+
+jobs:  
+ tag:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+         fetch-depth: 0
+
+
+      - name: Get Latest Tag
+        id: get_tag
+        run: |
+          $latestTag = git describe --tags $(git rev-list --tags --max-count=1)
+          echo "::set-output name=tag::$latestTag"
+      - name: Increment Tag
+        id: increment_tag
+        run: |
+          $tag = "${{ steps.get_tag.outputs.tag }}"
+          $versionParts = $tag.Split('.')
+          $lastPart = [int]$versionParts[-1]
+          $newLastPart = $lastPart + 1
+          $newTag = "$($versionParts[0]).$($versionParts[1]).$newLastPart"
+          echo "::set-output name=new_tag::$newTag"
+      - name: Create New Tag
+        run: |
+          $newTag = "${{ steps.increment_tag.outputs.new_tag }}"
+          git tag $newTag
+          git push origin $newTag
